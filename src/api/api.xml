@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>api</name>
+    </assembly>
+    <members>
+        <member name="T:api.AppRoot.Program">
+            <summary>
+            Angular-testing example API.
+            </summary>
+        </member>
+        <member name="M:api.AppRoot.Program.Main(System.String[])">
+            <summary>
+            Main entry point for the application.
+            </summary>
+            <param name="args">Not used.</param>
+        </member>
+        <member name="T:api.Startup">
+            <summary>
+            Startup class for the application.
+            </summary>
+        </member>
+        <member name="M:api.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Registers the services for the application.
+            </summary>
+            <param name="services">Application's services container.</param>
+        </member>
+        <member name="M:api.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment)">
+            <summary>
+            Configure the HTTP request pipeline.
+            </summary>
+            <param name="app">Instance of the <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/> to build the application's pipeline.</param>
+            <param name="env">Instance of the <see cref="T:Microsoft.AspNetCore.Hosting.IHostingEnvironment"/> to provide information about the hosting environment.</param>
+        </member>
+        <member name="T:api.Companies.CompaniesController">
+            <summary>
+            Company service.
+            </summary>
+        </member>
+        <member name="M:api.Companies.CompaniesController.Get">
+            <summary>
+            Gets the collection of <see cref="T:api.Companies.Company"/> of the application.
+            </summary>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> with the collection of <see cref="T:api.Companies.Company"/> of the application.</returns>
+        </member>
+        <member name="M:api.Companies.CompaniesController.Get(System.Int32)">
+            <summary>
+            Gets a <see cref="T:api.Companies.Company"/> given its <paramref name="id"/>.
+            </summary>
+            <param name="id">Id of the <see cref="T:api.Companies.Company"/> to retrieve.</param>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> with the <see cref="T:api.Companies.Company"/> with the given <paramref name="id"/> if such company exists.</returns>
+        </member>
+        <member name="M:api.Companies.CompaniesController.Post(api.Companies.NewCompany)">
+            <summary>
+            Adds a new <see cref="T:api.Companies.Company"/> to the application.
+            </summary>
+            <param name="newCompany">The <see cref="T:api.Companies.Company"/> to add</param>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.CreatedAtActionResult"/> with the created <see cref="T:api.Companies.Company"/> if success.</returns>
+        </member>
+        <member name="T:api.Companies.Company">
+            <summary>
+            Represents a company in the application.
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.Id">
+            <summary>
+            Unique Identifier.
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.StockLogoColor">
+            <summary>
+            Color of the stock logo.
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.Email">
+            <summary>
+            Email
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.Country">
+            <summary>
+            Country
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.MarketValue">
+            <summary>
+            Market value
+            </summary>
+        </member>
+        <member name="P:api.Companies.Company.CreationDate">
+            <summary>
+            Profile creation date.
+            </summary>
+        </member>
+        <member name="T:api.Companies.NewCompany">
+            <summary>
+            View Model to create a new <see cref="T:api.Companies.Company"/>
+            </summary>
+        </member>
+        <member name="P:api.Companies.NewCompany.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:api.Companies.NewCompany.Email">
+            <summary>
+            Email
+            </summary>
+        </member>
+        <member name="P:api.Companies.NewCompany.CountryId">
+            <summary>
+            Id of the country.
+            </summary>
+        </member>
+        <member name="P:api.Companies.NewCompany.MarketValue">
+            <summary>
+            Market value
+            </summary>
+        </member>
+        <member name="T:api.General.Countries.CountriesController">
+            <summary>
+            General countries service.
+            </summary>
+        </member>
+        <member name="T:api.General.Countries.Country">
+            <summary>
+            Represents a country in the application.
+            </summary>
+        </member>
+        <member name="P:api.General.Countries.Country.Id">
+            <summary>
+            Unique Identifier
+            </summary>
+        </member>
+        <member name="P:api.General.Countries.Country.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,17 @@
+<h1>Companies</h1>
+<div *ngFor="let company of (companies$ | async); trackBy: companyTrackerFn">
+  <span>Id: {{ company.id }}</span>
+  <br />
+  <span>StockLogo: {{ company.stockLogoColor }}</span>
+  <br />
+  <span>Name: {{ company.name }}</span>
+  <br />
+  <span>Email: {{ company.email }}</span>
+  <br />
+  <span>Country: {{ company.country.name }}</span>
+  <br />
+  <span>Value: {{ company.marketValue | currency }}</span>
+  <br />
+  <span>Creation Date: {{ company.creationDate | date }}</span>
+  <hr />
+</div>
