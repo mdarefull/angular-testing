@@ -1,0 +1,12 @@
+<mat-card>
+  <mat-card-header>
+    <div mat-card-avatar class="text-center" [ngClass]="stockClass">{{ name | stockLogo }}</div>
+    <mat-card-title>{{ name }}</mat-card-title>
+    <mat-card-subtitle>{{ marketValue | currency }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Country: {{ country }}</p>
+    <p>Email: {{ email }}</p>
+    <p>Creation Date: {{ creationDate | date: 'long' }}</p>
+  </mat-card-content>
+</mat-card>

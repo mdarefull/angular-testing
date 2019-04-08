@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CompaniesClient, Company } from 'shared';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-companies-page',
@@ -8,16 +6,4 @@ import { CompaniesClient, Company } from 'shared';
   styleUrls: ['./companies-page.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CompaniesPageComponent implements OnInit {
-  companies$: Observable<Company[]>;
-
-  constructor(private readonly client: CompaniesClient) {}
-
-  ngOnInit() {
-    this.companies$ = this.client.getAll();
-  }
-
-  companyTrackerFn(_: number, item: Company): number {
-    return item.id;
-  }
-}
+export class CompaniesPageComponent {}

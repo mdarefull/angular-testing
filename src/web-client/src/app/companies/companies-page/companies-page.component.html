@@ -1,17 +1,12 @@
-<h1>Companies</h1>
-<div *ngFor="let company of (companies$ | async); trackBy: companyTrackerFn">
-  <span>Id: {{ company.id }}</span>
-  <br />
-  <span>StockLogo: {{ company.stockLogoColor }}</span>
-  <br />
-  <span>Name: {{ company.name }}</span>
-  <br />
-  <span>Email: {{ company.email }}</span>
-  <br />
-  <span>Country: {{ company.country.name }}</span>
-  <br />
-  <span>Value: {{ company.marketValue | currency }}</span>
-  <br />
-  <span>Creation Date: {{ company.creationDate | date }}</span>
-  <hr />
-</div>
+<mat-sidenav-container>
+  <mat-sidenav-content>
+    <main class="container-fluid row">
+      <section class="col-6">
+        <app-companies-list-container></app-companies-list-container>
+      </section>
+      <section class="col-6">
+        <app-company-form-container></app-company-form-container>
+      </section>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

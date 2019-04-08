@@ -44,19 +44,12 @@ namespace api.Companies
         public ActionResult<IReadOnlyCollection<Company>> Get() => Companies.AsReadOnly();
 
         /// <summary>
-        /// Gets a <see cref="Company"/> given its <paramref name="id"/>.
-        /// </summary>
-        /// <param name="id">Id of the <see cref="Company"/> to retrieve.</param>
-        /// <returns><see cref="OkObjectResult"/> with the <see cref="Company"/> with the given <paramref name="id"/> if such company exists.</returns>
-        [HttpGet("{id}")]
-        public ActionResult<Company> Get(int id) => Companies.Find(c => c.Id == id);
-
-        /// <summary>
         /// Adds a new <see cref="Company"/> to the application.
         /// </summary>
         /// <param name="newCompany">The <see cref="Company"/> to add</param>
         /// <returns><see cref="CreatedAtActionResult"/> with the created <see cref="Company"/> if success.</returns>
         [HttpPost]
+        [ProducesResponseType(201)]
         public ActionResult<Company> Post(NewCompany newCompany)
         {
             var rnd = new Random();

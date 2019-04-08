@@ -1,0 +1,6 @@
+<h1 class="text-center">Companies</h1>
+<div class="list">
+  <div class="col-12" *ngFor="let company of companies; trackBy: companyTrackerFn">
+    <app-company [company]="company"> </app-company>
+  </div>
+</div>

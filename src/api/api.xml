@@ -44,13 +44,6 @@
             </summary>
             <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> with the collection of <see cref="T:api.Companies.Company"/> of the application.</returns>
         </member>
-        <member name="M:api.Companies.CompaniesController.Get(System.Int32)">
-            <summary>
-            Gets a <see cref="T:api.Companies.Company"/> given its <paramref name="id"/>.
-            </summary>
-            <param name="id">Id of the <see cref="T:api.Companies.Company"/> to retrieve.</param>
-            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> with the <see cref="T:api.Companies.Company"/> with the given <paramref name="id"/> if such company exists.</returns>
-        </member>
         <member name="M:api.Companies.CompaniesController.Post(api.Companies.NewCompany)">
             <summary>
             Adds a new <see cref="T:api.Companies.Company"/> to the application.
@@ -127,6 +120,12 @@
             <summary>
             General countries service.
             </summary>
+        </member>
+        <member name="M:api.General.Countries.CountriesController.Get">
+            <summary>
+            Gets the collection of <see cref="T:api.General.Countries.Country"/> of the application.
+            </summary>
+            <returns><see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> with the collection of <see cref="T:api.General.Countries.Country"/> of the application.</returns>
         </member>
         <member name="T:api.General.Countries.Country">
             <summary>

@@ -1,0 +1,27 @@
+<h1 class="text-center">New Company</h1>
+<form [formGroup]="formGroup" #myForm="ngForm" (submit)="onFormSubmit(myForm)">
+  <mat-progress-spinner *ngIf="isAddingCompany" [color]="'primary'" [mode]="'indeterminate'">
+  </mat-progress-spinner>
+  <span *ngIf="addCompanyError">{{ addCompanyError }}</span>
+  <mat-form-field>
+    <input matInput placeholder="Name" [formControl]="nameControl" />
+    <mat-error *ngIf="nameControl.invalid">Enter a valid Name</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput placeholder="Email" type="email" [formControl]="emailControl" />
+    <mat-error *ngIf="nameControl.invalid">Enter a valid Email</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-select placeholder="Country" [formControl]="countryControl">
+      <mat-option *ngFor="let country of countries" [value]="country.id">
+        {{ country.name }}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="nameControl.invalid">Select a Country</mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput placeholder="Market Value" [formControl]="marketValueControl" />
+    <mat-error *ngIf="nameControl.invalid">Enter a valid Market Value</mat-error>
+  </mat-form-field>
+  <button mat-button type="submit">Add</button>
+</form>

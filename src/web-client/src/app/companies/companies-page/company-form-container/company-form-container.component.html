@@ -1,0 +1,7 @@
+<app-company-form
+  [countries]="countries$ | async"
+  [isAddingCompany]="isAddingCompany$ | async"
+  [addCompanyError]="addCompanyError$ | async"
+  (addNewCompany)="onAddNewCompany($event)"
+>
+</app-company-form>

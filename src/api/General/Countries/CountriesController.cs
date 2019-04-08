@@ -25,9 +25,11 @@ namespace api.General.Countries
             new Country { Id = 10, Name = "French" },
         };
 
-        // TODO:
-        // Usually, this controller would be used as the entry point for the application countries.
-        // If the application needs to access a country, even if it's internally, it should be performed through a service client.
-        // Omitted for simplicity.
+        /// <summary>
+        /// Gets the collection of <see cref="Country"/> of the application.
+        /// </summary>
+        /// <returns><see cref="OkObjectResult"/> with the collection of <see cref="Country"/> of the application.</returns>
+        [HttpGet]
+        public ActionResult<IReadOnlyCollection<Country>> Get() => Countries.AsReadOnly();
     }
 }

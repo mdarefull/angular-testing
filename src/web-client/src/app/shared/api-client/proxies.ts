@@ -17,6 +17,70 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 @Injectable({
     providedIn: 'root'
 })
+export class CountriesClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ? baseUrl : "http://localhost:5000";
+    }
+
+    /**
+     * Gets the collection of Country of the application.
+     */
+    get(): Observable<Country[] | null> {
+        let url_ = this.baseUrl + "/api/General/Countries";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(<any>response_);
+                } catch (e) {
+                    return <Observable<Country[] | null>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<Country[] | null>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<Country[] | null> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <Country[]>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<Country[] | null>(<any>null);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class CompaniesClient {
     private http: HttpClient;
     private baseUrl: string;
@@ -30,7 +94,7 @@ export class CompaniesClient {
     /**
      * Gets the collection of Company of the application.
      */
-    getAll(): Observable<Company[] | null> {
+    get(): Observable<Company[] | null> {
         let url_ = this.baseUrl + "/api/Companies";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -43,11 +107,11 @@ export class CompaniesClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGetAll(response_);
+            return this.processGet(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processGetAll(<any>response_);
+                    return this.processGet(<any>response_);
                 } catch (e) {
                     return <Observable<Company[] | null>><any>_observableThrow(e);
                 }
@@ -56,7 +120,7 @@ export class CompaniesClient {
         }));
     }
 
-    protected processGetAll(response: HttpResponseBase): Observable<Company[] | null> {
+    protected processGet(response: HttpResponseBase): Observable<Company[] | null> {
         const status = response.status;
         const responseBlob = 
             response instanceof HttpResponse ? response.body : 
@@ -118,11 +182,11 @@ export class CompaniesClient {
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <Company>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : <Company>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result201);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -131,60 +195,14 @@ export class CompaniesClient {
         }
         return _observableOf<Company | null>(<any>null);
     }
+}
 
-    /**
-     * Gets a Company given its .
-     * @param id Id of the Company to retrieve.
-     */
-    get(id: number): Observable<Company | null> {
-        let url_ = this.baseUrl + "/api/Companies/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id)); 
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Accept": "application/json"
-            })
-        };
-
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGet(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processGet(<any>response_);
-                } catch (e) {
-                    return <Observable<Company | null>><any>_observableThrow(e);
-                }
-            } else
-                return <Observable<Company | null>><any>_observableThrow(response_);
-        }));
-    }
-
-    protected processGet(response: HttpResponseBase): Observable<Company | null> {
-        const status = response.status;
-        const responseBlob = 
-            response instanceof HttpResponse ? response.body : 
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <Company>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf<Company | null>(<any>null);
-    }
+/** Represents a country in the application. */
+export interface Country {
+    /** Unique Identifier */
+    id: number;
+    /** Name */
+    name?: string | undefined;
 }
 
 /** Represents a company in the application. */
@@ -203,14 +221,6 @@ export interface Company {
     marketValue: number;
     /** Profile creation date. */
     creationDate: Date;
-}
-
-/** Represents a country in the application. */
-export interface Country {
-    /** Unique Identifier */
-    id: number;
-    /** Name */
-    name?: string | undefined;
 }
 
 /** View Model to create a new Company */
