@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -40,6 +40,6 @@ import { StockLogoPipe } from './pipes/stock-logo.pipe';
     MatButtonModule,
     MatProgressSpinnerModule
   ],
-  providers: [HttpClient]
+  providers: [HttpClient, CurrencyPipe, StockLogoPipe, DatePipe]
 })
 export class SharedModule {}
