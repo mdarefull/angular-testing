@@ -20,8 +20,13 @@ import { CompanyComponent } from './company.component';
              The app would have been more robust but more rigid too (harder to refactor).
     - Unit tests with pipes involved:
         => Whenever we use a pipe, there's no way to create the purest unit test. This is the most practical approach.
+    - Not importing SharedModule:
+        => This was another practical decission.
+              Shared module should be common and simple enough as to not be considered 'dangerous' to just import it,
+              while importing each one of the required modules could tie this tests too much to the actual implementation.
 */
 
+// We use a Test Host Component to properly test angular features (@Input/@Output, etc...)
 @Component({
   template: '<app-company [company]="company"></app-company>'
 })

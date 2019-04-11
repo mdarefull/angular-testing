@@ -3,6 +3,7 @@ import { Select, Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { Company } from 'shared';
 import { CompaniesSelectors, GetCompanies } from '../../state';
+import { CompaniesStateModel } from 'companies/state/companies.model';
 
 @Component({
   selector: 'app-companies-list-container',
@@ -11,7 +12,7 @@ import { CompaniesSelectors, GetCompanies } from '../../state';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompaniesListContainerComponent implements OnInit {
-  @Select(CompaniesSelectors.companies) readonly companies$: Observable<Company[]>;
+  @Select((state: CompaniesStateModel) => state.companies) readonly companies$: Observable<Company[]>;
 
   constructor(private readonly store: Store) {}
 

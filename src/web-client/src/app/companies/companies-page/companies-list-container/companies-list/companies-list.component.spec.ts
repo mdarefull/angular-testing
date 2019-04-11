@@ -1,10 +1,8 @@
-import { Component, DebugElement } from '@angular/core';
+import { Component, DebugElement, Input } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Company } from 'shared';
-import { SharedModule } from 'shared/shared.module';
 import { CompaniesListComponent } from './companies-list.component';
-import { CompanyComponent } from './company/company.component';
 
 /* What could have been done different?
     - Test the details of the ngFor (trackBy):
@@ -13,6 +11,12 @@ import { CompanyComponent } from './company/company.component';
         => This could be considered as 'unpractical' because of how we not ngFor works.
     - Test style classes membership (h1.text-center)
         => This could be overkill.
+    - Isolate test child even better:
+        => We have 3 options here:
+              a. use the actual component (CompanyComponent): Restrict our test and could create exceptions due to template bindings, logic, etc.
+              b. use a component that extends the actual component, set an empty template and override conflicting methods.
+              c. use a completely empty component with just the required signature.
+        => We chose c.) becuase we set exactly what we want to test and it sholdn't break unlees the functionality changes.
 */
 
 @Component({
@@ -22,6 +26,16 @@ class TestHostComponent {
   companies: Company[];
 }
 
+// We use a Test Child Component to isolate the SUT from the components it render while
+// testing its communications.
+@Component({
+  template: '',
+  selector: 'app-company'
+})
+class TestChildComponent {
+  @Input() company: Company;
+}
+
 describe('CompaniesListComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let hostComponent: TestHostComponent;
@@ -29,20 +43,12 @@ describe('CompaniesListComponent', () => {
   let nativeElement: Element;
   let component: CompaniesListComponent;
   function create(...companies: Partial<Company>[]): Company[] {
-    return companies.map(
-      c =>
-        ({
-          country: {},
-          name: '',
-          ...c
-        } as Company)
-    );
+    return companies.map(c => c as Company);
   }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule],
-      declarations: [TestHostComponent, CompaniesListComponent, CompanyComponent]
+      declarations: [CompaniesListComponent, TestHostComponent, TestChildComponent]
     }).compileComponents();
   }));
 
@@ -73,13 +79,13 @@ describe('CompaniesListComponent', () => {
   it('render companies', () => {
     // Arrange:
     const companies = create({}, {}, {});
-    const companyComponents = debugElement
-      .queryAll(By.directive(CompanyComponent))
-      .map(d => d.componentInstance as CompanyComponent);
 
     // Act:
     hostComponent.companies = companies;
     fixture.detectChanges();
+    const companyComponents = debugElement
+      .queryAll(By.directive(TestChildComponent))
+      .map(d => d.componentInstance as TestChildComponent);
 
     // Assert:
     expect(companyComponents.length).toBe(companies.length);
