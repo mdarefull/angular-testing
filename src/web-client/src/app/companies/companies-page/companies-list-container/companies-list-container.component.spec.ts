@@ -27,7 +27,7 @@ class TestChildComponent {
 
 describe(CompaniesListContainerComponent.name, () => {
   let storeTestData: StoreData<CompaniesStateModel>;
-  let testData: ComponentData<CompaniesListContainerComponent>
+  let testData: ComponentData<CompaniesListContainerComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientModule, NgxsModule.forRoot([CompaniesState])],
@@ -61,16 +61,16 @@ describe(CompaniesListContainerComponent.name, () => {
 
   it('selects companies', () => {
     // Arrange
-    const testChild = testData.getChild(TestChildComponent);
+    const child = testData.queryChild(TestChildComponent);
     const model = {
       companies: [{}, {}] as Company[]
     } as CompaniesStateModel;
 
     // Act
-    storeTestData.resetState(model);
+    storeTestData.setState(model);
     testData.detectChanges();
 
     // Assert
-    expect(testChild.companies).toEqual(model.companies);
+    expect(child.companies).toEqual(model.companies);
   });
 });

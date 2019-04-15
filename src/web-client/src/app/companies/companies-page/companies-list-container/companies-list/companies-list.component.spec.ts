@@ -30,10 +30,6 @@ class TestChildComponent {
   @Input() company: Company;
 }
 
-// function create(...companies: Partial<Company>[]): Company[] {
-//   return companies.map(c => c as Company);
-// }
-
 describe(CompaniesListComponent.name, () => {
   let testData: HostComponentData<TestHostComponent, CompaniesListComponent>;
 
@@ -54,7 +50,7 @@ describe(CompaniesListComponent.name, () => {
 
   it('renders header', () => {
     // Arrange
-    const header = testData.nativeElement.querySelector('h1');
+    const header = testData.queryNative('h1');
 
     // Assert
     expect(header).toBeTruthy();
@@ -68,7 +64,7 @@ describe(CompaniesListComponent.name, () => {
     // Act
     testData.component.companies = companies;
     testData.detectChanges();
-    const companyComponents = testData.getChildren(TestChildComponent);
+    const companyComponents = testData.queryChildren(TestChildComponent);
 
     // Assert
     expect(companyComponents.length).toBe(companies.length);

@@ -32,9 +32,15 @@ class TestChildComponent {
   @Output() readonly addNewCompany = new EventEmitter<NewCompany>();
 }
 
+class CompanyFormContainerComponentData extends ComponentData<CompanyFormContainerComponent> {
+  get childComponent() {
+    return this.queryChild(TestChildComponent);
+  }
+}
+
 describe(CompanyFormContainerComponent.name, () => {
   let storeTestData: StoreData<CompaniesStateModel>;
-  let testData: ComponentData<CompanyFormContainerComponent>;
+  let testData: CompanyFormContainerComponentData;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -43,13 +49,10 @@ describe(CompanyFormContainerComponent.name, () => {
     }).compileComponents();
   }));
 
-  // This one must be called after the Test Module creation and before the component initialization.
   beforeEach(() => {
+    // This one must be called after the Test Module creation and before the component initialization.
     storeTestData = new StoreData<CompaniesStateModel>(CompaniesState.stateName);
-  });
-
-  beforeEach(() => {
-    testData = new ComponentData(CompanyFormContainerComponent);
+    testData = new CompanyFormContainerComponentData(CompanyFormContainerComponent);
   });
 
   it('creates', () => {
@@ -69,59 +72,59 @@ describe(CompanyFormContainerComponent.name, () => {
 
   it('selects countries', () => {
     // Arrange
-    const testChild = testData.getChild(TestChildComponent);
+    const child = testData.childComponent;
     const model = {
       countries: [{ name: '' }, { name: '' }] as Country[]
     } as CompaniesStateModel;
 
     // Act
-    storeTestData.resetState(model);
+    storeTestData.setState(model);
     testData.detectChanges();
 
     // Assert
-    expect(testChild.countries).toEqual(model.countries);
+    expect(child.countries).toEqual(model.countries);
   });
 
   it('selects is adding company flag', () => {
     // Arrange
-    const testChild = testData.getChild(TestChildComponent);
+    const child = testData.childComponent;
     const model = {
       isAddingCompany: true
     } as CompaniesStateModel;
 
     // Act
-    storeTestData.resetState(model);
+    storeTestData.setState(model);
     testData.detectChanges();
 
     // Assert
-    expect(testChild.isAddingCompany).toBe(model.isAddingCompany);
+    expect(child.isAddingCompany).toBe(model.isAddingCompany);
   });
 
   it('selects add company error', () => {
     // Arrange
-    const testChild = testData.getChild(TestChildComponent);
+    const child = testData.childComponent;
     const model = {
       addCompanyError: 'some error'
     } as CompaniesStateModel;
 
     // Act
-    storeTestData.resetState(model);
+    storeTestData.setState(model);
     testData.detectChanges();
 
     // Assert
-    expect(testChild.addCompanyError).toBe(model.addCompanyError);
+    expect(child.addCompanyError).toBe(model.addCompanyError);
   });
 
   it('dispatches AddCompany on addNewCompany event', () => {
     // Arrange
-    const testChild = testData.getChild(TestChildComponent);
+    const child = testData.childComponent;
     const newCompany = {} as NewCompany;
     const expectedAction = new AddCompany(newCompany);
 
     storeTestData.dispatchSpy.calls.reset();
 
     // Act
-    testChild.addNewCompany.emit(newCompany);
+    child.addNewCompany.emit(newCompany);
 
     // Assert
     storeTestData.assertActionsDispatched(expectedAction);

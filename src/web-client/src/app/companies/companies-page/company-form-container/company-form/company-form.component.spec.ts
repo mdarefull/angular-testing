@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Country } from 'shared';
+import { Country, NewCompany } from 'shared';
 import { HostComponentData } from 'shared/test';
 import { CompanyFormComponent } from './company-form.component';
 
@@ -31,19 +31,15 @@ import { CompanyFormComponent } from './company-form.component';
         * Better email forma tests.
         => Some cases are over kill while others entierly unpractical (mat-error behavior).
         => BUT: We should have a test for each AC and for each bug found.
-
-    - Create a unique @Input() parameter with all the data:
-        => This reduces the isolation of a test, making each harder to maintain.
-    - Not tying to angular material components:
-        => We are using angular material so there are some strict rules to follow.
-             Selecting elements by its type (<mat-card-title>) directly it's the most practical approach.
-    - Test the template layout better:
-        * it renders a <mat-card>
-        * better select each element: mat-card-title is the second child inside mat-card-header
-        => These are not strictly functional specifications and testing it would tight the tests more to the implementation.
-             The app would have been more robust but more rigid too (harder to refactor).
-    - Unit tests with pipes involved:
-        => Whenever we use a pipe, there's no way to create the purest unit test. This is the most practical approach.
+    - Not depending on FormControlDirective to set values and states:
+        => Manually changing input values would be overkill and cumbersome.
+             This is the most practical approach because it's a widely default angular feature.
+    - Follow the Single Responsibility Pattern for tests:
+        => This is a gray zone.
+             Angular component testing is, at some extend, a kind of integration testing and are expensive.
+             We will end with hundreds or thousands of tests that could take several minutes to execute.
+             On this scenario, it's practical to have several related and expensive tests executed together.
+        => Jasmine, by default, won't stop on first failure, so it will report most errors on test run.
 */
 
 // We use a Test Host Component to properly test angular features (@Input/@Output, etc...)
@@ -63,8 +59,74 @@ class TestHostComponent {
   addCompanyError: string;
 }
 
-fdescribe(CompanyFormComponent.name, () => {
-  let testData: HostComponentData<TestHostComponent, CompanyFormComponent>;
+// Implements the Page Model pattern to provide easy access to the form page elements.
+class CompanyFormData extends HostComponentData<TestHostComponent, CompanyFormComponent> {
+  get header() {
+    return this.queryNative('h1') as HTMLHeadingElement;
+  }
+
+  get spinner() {
+    return this.queryNative('mat-progress-spinner');
+  }
+
+  get addErrorMsg() {
+    return this.queryNative('#add-company-error-message');
+  }
+
+  get formGroup() {
+    return this.queryGroup('form');
+  }
+
+  get nameInput() {
+    return this.queryNative('#name-input') as HTMLInputElement;
+  }
+  get nameControl() {
+    return this.queryControl('#name-input');
+  }
+  get nameInputError() {
+    return this.queryNative('#name-input-error');
+  }
+
+  get emailInput() {
+    return this.queryNative('#email-input') as HTMLInputElement;
+  }
+  get emailControl() {
+    return this.queryControl('#email-input');
+  }
+  get emailInputError() {
+    return this.queryNative('#email-input-error');
+  }
+
+  get countriesSelect() {
+    return this.queryNative('#countries-select') as HTMLInputElement;
+  }
+  get countriesMatSelect() {
+    return this.queryChild(MatSelect);
+  }
+  get countriesControl() {
+    return this.countriesMatSelect.ngControl.control;
+  }
+  get countriesSelectError() {
+    return this.queryNative('#countries-select-error');
+  }
+
+  get marketValueInput() {
+    return this.queryNative('#market-value-input') as HTMLInputElement;
+  }
+  get marketValueControl() {
+    return this.queryControl('#market-value-input');
+  }
+  get marketValueInputError() {
+    return this.queryNative('#market-value-input-error');
+  }
+
+  get submitBtn() {
+    return this.queryNative('button[type="submit"]') as HTMLButtonElement;
+  }
+}
+
+describe(CompanyFormComponent.name, () => {
+  let testData: CompanyFormData;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -82,7 +144,7 @@ fdescribe(CompanyFormComponent.name, () => {
   }));
 
   beforeEach(() => {
-    testData = new HostComponentData(TestHostComponent, CompanyFormComponent);
+    testData = new CompanyFormData(TestHostComponent, CompanyFormComponent);
   });
 
   it('creates', () => {
@@ -92,7 +154,7 @@ fdescribe(CompanyFormComponent.name, () => {
 
   it('renders header', () => {
     // Arrange
-    const header = testData.nativeElement.querySelector('h1');
+    const header = testData.header;
 
     // Assert
     expect(header).toBeTruthy();
@@ -104,12 +166,12 @@ fdescribe(CompanyFormComponent.name, () => {
     testData.component.isAddingCompany = true;
     testData.detectChanges();
 
-    const spinner = testData.nativeElement.querySelector('mat-progress-spinner');
+    const spinner = testData.spinner;
 
     // Assert
     expect(spinner).toBeTruthy();
 
-    // These are optional. Test only if they are part of the ACs.
+    // These are optional. Test only if they are part of the ACs. Included only as reference
     const color = spinner.attributes.getNamedItem('ng-reflect-color');
     expect(color.value).toBe('primary');
 
@@ -121,15 +183,17 @@ fdescribe(CompanyFormComponent.name, () => {
     // Act
     testData.component.addCompanyError = 'some error';
     testData.detectChanges();
-    const errorSpan = testData.nativeElement.querySelector('#add-company-error-message');
+
+    const addCompanyError = testData.addErrorMsg;
 
     // Assert
-    expect(errorSpan.textContent).toBe(testData.component.addCompanyError);
+    expect(addCompanyError).toBeTruthy();
+    expect(addCompanyError.textContent).toBe(testData.component.addCompanyError);
   });
 
   it('renders name input', () => {
     // Arrange
-    const nameInput = testData.nativeElement.querySelector('#name-input') as HTMLInputElement;
+    const nameInput = testData.nameInput;
 
     // Assert
     expect(nameInput).toBeTruthy();
@@ -138,24 +202,14 @@ fdescribe(CompanyFormComponent.name, () => {
   });
 
   it('name input is required', () => {
-    // Arrange
-    const nameInput = testData.nativeElement.querySelector('#name-input') as HTMLInputElement;
-
     // Assert
-    const isInvalid = nameInput.classList.contains('ng-invalid');
-    expect(isInvalid).toBeTruthy();
+    testData.assertRequired(testData.nameControl);
   });
 
   it('renders name input validation error', () => {
-    // Arrange
-    const nameInput = testData.nativeElement.querySelector('#name-input') as HTMLInputElement;
-
     // Act
-    nameInput.dispatchEvent(new Event('focus'));
-    nameInput.dispatchEvent(new Event('blur'));
-    testData.detectChanges();
-
-    const nameError = testData.nativeElement.querySelector('#name-input-error');
+    testData.touch(testData.nameControl);
+    const nameError = testData.nameInputError;
 
     // Assert
     expect(nameError).toBeTruthy();
@@ -164,7 +218,7 @@ fdescribe(CompanyFormComponent.name, () => {
 
   it('renders email input', () => {
     // Arrange
-    const emailInput = testData.nativeElement.querySelector('#email-input') as HTMLInputElement;
+    const emailInput = testData.emailInput;
 
     // Assert
     expect(emailInput).toBeTruthy();
@@ -174,61 +228,44 @@ fdescribe(CompanyFormComponent.name, () => {
 
   it('email input must have valid email format', () => {
     // Arrange
-    const emailInput = testData.nativeElement.querySelector('#email-input') as HTMLInputElement;
+    const emailControl = testData.emailControl;
 
     // Act
-    emailInput.value = 'this is not an email';
-    emailInput.dispatchEvent(new Event('input'));
-    testData.detectChanges();
+    testData.setValue(emailControl, 'this is not an email');
 
     // Assert
-    const isInvalid = emailInput.classList.contains('ng-invalid');
-    expect(isInvalid).toBeTruthy();
+    expect(emailControl.invalid).toBeTruthy();
   });
 
   it('renders email input validation error', () => {
-    // Arrange
-    const emailInput = testData.nativeElement.querySelector('#email-input') as HTMLInputElement;
-
     // Act
-    emailInput.value = 'invalid email';
-    emailInput.dispatchEvent(new Event('input'));
-    emailInput.dispatchEvent(new Event('focus'));
-    emailInput.dispatchEvent(new Event('blur'));
-    testData.detectChanges();
+    testData.setValue(testData.emailControl, 'this is not an email');
 
-    const emailError = testData.nativeElement.querySelector('#email-input-error');
+    const emailError = testData.emailInputError;
 
     // Assert
     expect(emailError).toBeTruthy();
     expect(emailError.textContent).toBe('Enter a valid Email');
   });
 
-  it('renders country select', () => {
+  it('renders countries select with application countries', () => {
     // Arrange
-    const countrySelect = testData.getChild(MatSelect);
-
-    // Assert
-    expect(countrySelect).toBeTruthy();
-    expect(countrySelect.placeholder).toBe('Country');
-    expect(countrySelect.required).toBeTruthy();
-  });
-
-  it('renders country select with input countries', () => {
-    // Arrange
-    const countrySelect = testData.getChild(MatSelect);
     const countries = [
       { id: 1, name: 'C1' },
       { id: 2, name: 'C2' },
       { id: 3, name: 'C3' }
     ] as Country[];
-
-    // Act
     testData.component.countries = countries;
     testData.detectChanges();
-    const options = countrySelect.options.toArray();
+
+    const countriesSelect = testData.countriesMatSelect;
+    const options = countriesSelect.options.toArray();
 
     // Assert
+    expect(countriesSelect).toBeTruthy();
+    expect(countriesSelect.placeholder).toBe('Country');
+    expect(countriesSelect.required).toBeTruthy();
+
     expect(options.length).toBe(countries.length);
     for (let i = 0; i < countries.length; i++) {
       const country = countries[i];
@@ -239,25 +276,16 @@ fdescribe(CompanyFormComponent.name, () => {
     }
   });
 
-  it('country select is required', () => {
-    // Arrange
-    const countrySelect = testData.nativeElement.querySelector('#country-select');
-
+  it('countries select is required', () => {
     // Assert
-    const isInvalid = countrySelect.classList.contains('ng-invalid');
-    expect(isInvalid).toBeTruthy();
+    testData.assertRequired(testData.countriesControl);
   });
 
-  it('renders country select validation error', () => {
-    // Arrange
-    const countrySelect = testData.nativeElement.querySelector('#country-select');
-
+  it('if countries select is invalid, will render validation error', () => {
     // Act
-    countrySelect.dispatchEvent(new Event('focus'));
-    countrySelect.dispatchEvent(new Event('blur'));
-    testData.detectChanges();
+    testData.touch(testData.countriesControl);
 
-    const countriesError = testData.nativeElement.querySelector('#country-select-error');
+    const countriesError = testData.countriesSelectError;
 
     // Assert
     expect(countriesError).toBeTruthy();
@@ -266,9 +294,7 @@ fdescribe(CompanyFormComponent.name, () => {
 
   it('renders market value input', () => {
     // Arrange
-    const marketInput = testData.nativeElement.querySelector(
-      '#market-value-input'
-    ) as HTMLInputElement;
+    const marketInput = testData.marketValueInput;
 
     // Assert
     expect(marketInput).toBeTruthy();
@@ -277,44 +303,26 @@ fdescribe(CompanyFormComponent.name, () => {
   });
 
   it('market value input is required', () => {
-    // Arrange
-    const marketInput = testData.nativeElement.querySelector(
-      '#market-value-input'
-    ) as HTMLInputElement;
-
     // Assert
-    const isInvalid = marketInput.classList.contains('ng-invalid');
-    expect(isInvalid);
+    testData.assertRequired(testData.marketValueControl);
   });
 
   it('market value input must be decimal', () => {
     // Arrange
-    const marketInput = testData.nativeElement.querySelector(
-      '#market-value-input'
-    ) as HTMLInputElement;
+    const marketControl = testData.marketValueControl;
 
     // Act
-    marketInput.value = 'not decimal value';
-    marketInput.dispatchEvent(new Event('input'));
-    testData.detectChanges();
+    testData.setValue(marketControl, 'not decimal value');
 
     // Assert
-    const isInvalid = marketInput.classList.contains('ng-invalid');
-    expect(isInvalid);
+    expect(marketControl.invalid).toBeTruthy();
   });
 
-  it('renders market value input validation error', () => {
-    // Arrange
-    const marketInput = testData.nativeElement.querySelector(
-      '#market-value-input'
-    ) as HTMLInputElement;
-
+  it('if market value is invalid, will render validation error', () => {
     // Act
-    marketInput.dispatchEvent(new Event('focus'));
-    marketInput.dispatchEvent(new Event('blur'));
-    testData.detectChanges();
+    testData.touch(testData.marketValueControl);
 
-    const marketInputError = testData.nativeElement.querySelector('#market-value-input-error');
+    const marketInputError = testData.marketValueInputError;
 
     // Assert
     expect(marketInputError).toBeTruthy();
@@ -323,20 +331,55 @@ fdescribe(CompanyFormComponent.name, () => {
 
   it('renders submit button', () => {
     // Arrange
-    const submitBtn = testData.nativeElement.querySelector('button[type="submit"]');
-    debugger;
+    const submitBtn = testData.submitBtn;
+
     // Assert
+    expect(submitBtn).toBeTruthy();
+    expect(submitBtn.textContent).toBe('Add');
   });
 
-  it('emit addNewCompany if valid form submitted', () => {
+  it('if invalid form submitted, will not emit addNewCompany', () => {
+    // Arrange
+    let emitted = false;
+    testData.hostedComponent.addNewCompany.subscribe(() => (emitted = true));
+
+    // Act
+    testData.submitBtn.click();
+
     // Assert
+    expect(emitted).toBeFalsy();
   });
 
-  it('does not emit addNewCompany if invalid form submitted', () => {
-    // Assert
-  });
+  it('if valid form submitted, will emit addNewCompany and reset form', () => {
+    // Arrange
+    const newCompany: NewCompany = {
+      countryId: 2,
+      email: 'test@example.com',
+      marketValue: 34.78,
+      name: 'some name'
+    };
+    testData.component.countries = [
+      { id: 1, name: 'US' },
+      { id: 2, name: 'Canada' },
+      { id: 3, name: 'UK' }
+    ];
+    testData.detectChanges();
 
-  it('reset form when submitted', () => {
+    testData.setValue(testData.nameControl, newCompany.name);
+    testData.setValue(testData.emailControl, newCompany.email);
+    testData.setValue(testData.countriesControl, newCompany.countryId);
+    testData.setValue(testData.marketValueControl, newCompany.marketValue);
+
+    let emittedCompany: NewCompany;
+    testData.hostedComponent.addNewCompany.subscribe((c: NewCompany) => (emittedCompany = c));
+    const resetSpy = spyOn(testData.formGroup, 'reset');
+
+    // Act
+    testData.submitBtn.click();
+    testData.detectChanges();
+
     // Assert
+    expect(emittedCompany).toEqual(newCompany);
+    expect(resetSpy).toHaveBeenCalledTimes(1);
   });
 });

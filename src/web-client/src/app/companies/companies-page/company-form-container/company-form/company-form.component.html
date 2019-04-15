@@ -8,19 +8,31 @@
     <mat-error id="name-input-error">Enter a valid Name</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input id='email-input' matInput placeholder="Email" type="email" [formControl]="emailControl" />
-    <mat-error id='email-input-error'>Enter a valid Email</mat-error>
+    <input
+      id="email-input"
+      matInput
+      placeholder="Email"
+      type="email"
+      [formControl]="emailControl"
+    />
+    <mat-error id="email-input-error">Enter a valid Email</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <mat-select id="country-select" placeholder="Country" [formControl]="countryControl" required>
+    <mat-select id="countries-select" placeholder="Country" [formControl]="countryControl" required>
       <mat-option *ngFor="let country of countries" [value]="country.id">
         {{ country.name }}
       </mat-option>
     </mat-select>
-    <mat-error id="country-select-error">Select a Country</mat-error>
+    <mat-error id="countries-select-error">Select a Country</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input id="market-value-input" matInput placeholder="Market Value" [formControl]="marketValueControl" required />
+    <input
+      id="market-value-input"
+      matInput
+      placeholder="Market Value"
+      [formControl]="marketValueControl"
+      required
+    />
     <mat-error id="market-value-input-error">Enter a valid Market Value</mat-error>
   </mat-form-field>
   <button mat-button type="submit">Add</button>

@@ -1,4 +1,4 @@
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
@@ -30,16 +30,55 @@ class TestHostComponent {
   company: Company;
 }
 
-const defaultCompany = {
-  name: '',
-  country: {}
-} as Company;
-function create(company: Partial<Company>): Company {
-  return { ...defaultCompany, ...company };
+class CompanyComponentData extends HostComponentData<TestHostComponent, CompanyComponent> {
+  readonly defaultCompany = {
+    name: '',
+    country: {}
+  } as Company;
+
+  get stockLogo() {
+    return this.queryNative('.mat-card-avatar');
+  }
+
+  get nameText() {
+    return this.queryNative('mat-card-title');
+  }
+
+  get marketValueText() {
+    return this.queryNative('mat-card-subtitle');
+  }
+
+  get cardContentTexts() {
+    return this.queryAllNative('mat-card-content p');
+  }
+
+  get countryText() {
+    return this.cardContentTexts[0];
+  }
+
+  get emailText() {
+    return this.component.company.email ? this.cardContentTexts[1] : undefined;
+  }
+
+  get creationDateText() {
+    const hasEmail = this.component.company.email;
+    return this.cardContentTexts[hasEmail ? 2 : 1];
+  }
+
+  constructor() {
+    super(TestHostComponent, CompanyComponent, false);
+
+    this.component.company = this.defaultCompany;
+    this.detectChanges();
+  }
+
+  createCompany(company: Partial<Company>): Company {
+    return { ...this.defaultCompany, ...company };
+  }
 }
 
 describe(CompanyComponent.name, () => {
-  let testData: HostComponentData<TestHostComponent, CompanyComponent>;
+  let testData: CompanyComponentData;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -50,9 +89,7 @@ describe(CompanyComponent.name, () => {
   }));
 
   beforeEach(() => {
-    testData = new HostComponentData(TestHostComponent, CompanyComponent, false);
-    testData.component.company = defaultCompany;
-    testData.detectChanges();
+    testData = new CompanyComponentData();
   });
 
   it('creates', () => {
@@ -62,11 +99,11 @@ describe(CompanyComponent.name, () => {
 
   it('renders stock logo', () => {
     // Arrange
-    const company = create({ name: 'Some Name', stockLogoColor: 2 });
-    const pipe = TestBed.get(StockLogoPipe) as StockLogoPipe;
+    const company = testData.createCompany({ name: 'Some Name', stockLogoColor: 2 });
+    const pipe = testData.getDependency(StockLogoPipe);
     const expectedText = pipe.transform(company.name);
     const expectedClass = `color-${company.stockLogoColor}`;
-    const stockLogo = testData.nativeElement.querySelector('.mat-card-avatar');
+    const stockLogo = testData.stockLogo;
 
     // Act
     testData.component.company = company;
@@ -80,8 +117,8 @@ describe(CompanyComponent.name, () => {
 
   it('renders name', () => {
     // Arrange
-    const company = create({ name: 'Company Name' });
-    const name = testData.nativeElement.querySelector('mat-card-title');
+    const company = testData.createCompany({ name: 'Company Name' });
+    const name = testData.nameText;
 
     // Act
     testData.component.company = company;
@@ -94,10 +131,10 @@ describe(CompanyComponent.name, () => {
 
   it('renders market value', () => {
     // Arrange
-    const company = create({ marketValue: 123456.78 });
-    const pipe = TestBed.get(CurrencyPipe) as CurrencyPipe;
+    const company = testData.createCompany({ marketValue: 123456.78 });
+    const pipe = testData.getDependency(CurrencyPipe) as CurrencyPipe;
     const expectedText = pipe.transform(company.marketValue);
-    const marketValue = testData.nativeElement.querySelector('mat-card-subtitle');
+    const marketValue = testData.marketValueText;
 
     // Act
     testData.component.company = company;
@@ -110,8 +147,8 @@ describe(CompanyComponent.name, () => {
 
   it('renders country', () => {
     // Arrange
-    const company = create({ country: { name: 'United Stated' } as Country });
-    const country = testData.nativeElement.querySelectorAll('mat-card-content p')[0];
+    const company = testData.createCompany({ country: { name: 'United Stated' } as Country });
+    const country = testData.countryText;
 
     // Act
     testData.component.company = company;
@@ -124,12 +161,12 @@ describe(CompanyComponent.name, () => {
 
   it('renders email', () => {
     // Arrange
-    const company = create({ email: 'test@example.com' });
+    const company = testData.createCompany({ email: 'test@example.com' });
 
     // Act
     testData.component.company = company;
     testData.detectChanges();
-    const email = testData.nativeElement.querySelectorAll('mat-card-content p')[1];
+    const email = testData.emailText;
 
     // Assert
     expect(email).toBeTruthy();
@@ -138,23 +175,24 @@ describe(CompanyComponent.name, () => {
 
   it('does not render falsy email', () => {
     // Arrange
-    const company = create({ email: undefined });
+    const company = testData.createCompany({ email: undefined });
 
     // Act
     testData.component.company = company;
     testData.detectChanges();
-    const contents = testData.nativeElement.querySelectorAll('mat-card-content p');
 
     // Assert
-    expect(contents.length).toBe(2);
+    expect(testData.cardContentTexts.length).toBe(2);
   });
 
   it('renders creation date', () => {
     // Arrange
-    const company = create({ creationDate: new Date(2019, 12, 31, 12, 38, 33, 128) });
-    const pipe = TestBed.get(DatePipe) as DatePipe;
+    const company = testData.createCompany({
+      creationDate: new Date(2019, 12, 31, 12, 38, 33, 128)
+    });
+    const pipe = testData.getDependency(DatePipe);
     const expectedDate = pipe.transform(company.creationDate, 'long');
-    const creationDate = testData.nativeElement.querySelectorAll('mat-card-content p')[1];
+    const creationDate = testData.creationDateText;
 
     // Act
     testData.component.company = company;

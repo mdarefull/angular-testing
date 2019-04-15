@@ -28,7 +28,7 @@ export class StoreData<TModel> {
     }
   }
 
-  resetState(model: TModel) {
+  setState(model: TModel) {
     const state = {};
     state[this.stateName] = model;
 
