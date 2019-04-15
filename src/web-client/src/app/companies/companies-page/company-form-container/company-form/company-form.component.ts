@@ -5,12 +5,12 @@ import { Country, nameOf, NewCompany } from 'shared';
 @Component({
   selector: 'app-company-form',
   templateUrl: './company-form.component.html',
-  styleUrls: ['./company-form.component.less']
+  styleUrls: ['./company-form.component.scss']
 })
 export class CompanyFormComponent implements OnInit {
   @Input() countries: Country[];
-  @Input() readonly isAddingCompany: boolean;
-  @Input() readonly addCompanyError: string;
+  @Input() isAddingCompany: boolean;
+  @Input() addCompanyError: string;
 
   @Output() readonly addNewCompany = new EventEmitter<NewCompany>();
 
@@ -32,7 +32,7 @@ export class CompanyFormComponent implements OnInit {
     this.buildMarketValueControl();
   }
   private buildNameControl() {
-    this.nameControl = new FormControl(null, Validators.required);
+    this.nameControl = new FormControl(null);
     this.formGroup.addControl(nameOf<NewCompany>('name'), this.nameControl);
   }
   private buildEmailControl() {

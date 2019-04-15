@@ -1,45 +1,21 @@
-import { Component, DebugElement, Input, Type } from '@angular/core';
-import {
-  async,
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-  flush,
-  flushMicrotasks
-} from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { NgxsModule, Store } from '@ngxs/store';
+import { HttpClientModule } from '@angular/common/http';
+import { Component, Input } from '@angular/core';
+import { async, TestBed } from '@angular/core/testing';
+import { NgxsModule } from '@ngxs/store';
+import { GetCompanies } from 'companies/state';
 import { CompaniesStateModel } from 'companies/state/companies.model';
 import { CompaniesState } from 'companies/state/companies.state';
 import { Company } from 'shared';
-import { SharedModule } from 'shared/shared.module';
+import { ComponentData, StoreData } from 'shared/test';
 import { CompaniesListContainerComponent } from './companies-list-container.component';
 
-// #region Helpers candidates:
-interface ComponentTestData<T> {
-  fixture: ComponentFixture<T>;
-  debugElement: DebugElement;
-  nativeElement: Element;
-  component: T;
-}
-
-function initializeComponent<T>(componentType: Type<T>): ComponentTestData<T> {
-  const fixture = TestBed.createComponent(componentType);
-  const component = fixture.componentInstance;
-  const debugElement = fixture.debugElement;
-  const nativeElement = fixture.nativeElement;
-
-  fixture.detectChanges();
-
-  return {
-    component: component,
-    debugElement: debugElement,
-    fixture: fixture,
-    nativeElement: nativeElement
-  };
-}
-// #endregion Helpers candidates
+/* What could have been done different?
+    - Mock CompanyState instead than integrating it.
+        => This is overkill.
+             By mocking 'dispatch' on the Store we ensure no side-effect would be executed.
+             This way it's easier to test state slice selection.
+       *** Main inconvenience is that we new to provide the state dependencies. Usually, HttpClientModule
+*/
 
 @Component({
   template: '',
@@ -49,56 +25,52 @@ class TestChildComponent {
   @Input() companies: Company[];
 }
 
-fdescribe('CompaniesListContainerComponent', () => {
-  let store: Store;
-  // const stateSpy = jasmine.createSpyObj<CompaniesState>(['getCompanies']);
-
+describe(CompaniesListContainerComponent.name, () => {
+  let storeTestData: StoreData<CompaniesStateModel>;
+  let testData: ComponentData<CompaniesListContainerComponent>
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [SharedModule, NgxsModule.forRoot([CompaniesState])],
+      imports: [HttpClientModule, NgxsModule.forRoot([CompaniesState])],
       declarations: [CompaniesListContainerComponent, TestChildComponent]
-      // providers: [{ provide: CompaniesState, useValue: stateSpy }]
     }).compileComponents();
   }));
 
+  // This one must be called after the Test Module creation and before the component initialization.
   beforeEach(() => {
-    store = TestBed.get(Store) as Store;
-    spyOn(store, 'dispatch');
+    storeTestData = new StoreData<CompaniesStateModel>(CompaniesState.stateName);
   });
 
-  // it('should create', () => {
-  //   // Arrange:
-  //   const testData = initializeComponent(CompaniesListContainerComponent);
+  beforeEach(() => {
+    testData = new ComponentData(CompaniesListContainerComponent);
+  });
 
-  //   // Assert:
-  //   expect(testData.component).toBeTruthy();
-  // });
+  it('creates', () => {
+    // Assert
+    testData.assertWasCreated();
+  });
 
-  // it('should dispatch GetCompanies onInit', () => {
-  //   // Act:
-  //   initializeComponent(CompaniesListContainerComponent);
+  it('dispatches GetCompanies onInit', () => {
+    // Assert
+    storeTestData.assertActionsDispatched(new GetCompanies());
+  });
 
-  //   // Assert
-  //   expect(stateSpy.getCompanies).toHaveBeenCalledTimes(1);
-  // });
+  it('renders companies list', () => {
+    // Assert
+    testData.assertHasChild(TestChildComponent);
+  });
 
-  it('should select companies', () => {
+  it('selects companies', () => {
     // Arrange
-    const testData = initializeComponent(CompaniesListContainerComponent);
-    const testChild = testData.debugElement.query(By.directive(TestChildComponent))
-      .componentInstance as TestChildComponent;
-
-    store = TestBed.get(Store);
-    const state = {
-      companies: [{} as Company, {} as Company]
+    const testChild = testData.getChild(TestChildComponent);
+    const model = {
+      companies: [{}, {}] as Company[]
     } as CompaniesStateModel;
 
     // Act
-    store.reset(state);
-    testData.fixture.detectChanges();
-    debugger;
+    storeTestData.resetState(model);
+    testData.detectChanges();
 
     // Assert
-    expect(testChild.companies).toBe(state.companies);
+    expect(testChild.companies).toEqual(model.companies);
   });
 });

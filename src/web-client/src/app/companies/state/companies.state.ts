@@ -6,10 +6,12 @@ import { AddCompany, GetCompanies, GetCountries } from './actions';
 import { CompaniesStateModel, initialCompaniesStateModel } from './companies.model';
 
 @State<CompaniesStateModel>({
-  name: 'companies',
+  name: CompaniesState.stateName,
   defaults: initialCompaniesStateModel
 })
 export class CompaniesState {
+  static readonly stateName = 'companies';
+
   constructor(
     private readonly companiesClient: CompaniesClient,
     private readonly countriesClient: CountriesClient

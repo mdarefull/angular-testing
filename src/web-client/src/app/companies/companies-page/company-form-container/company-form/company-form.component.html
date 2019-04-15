@@ -2,26 +2,26 @@
 <form [formGroup]="formGroup" #myForm="ngForm" (submit)="onFormSubmit(myForm)">
   <mat-progress-spinner *ngIf="isAddingCompany" [color]="'primary'" [mode]="'indeterminate'">
   </mat-progress-spinner>
-  <span *ngIf="addCompanyError">{{ addCompanyError }}</span>
+  <span id="add-company-error-message" *ngIf="addCompanyError">{{ addCompanyError }}</span>
   <mat-form-field>
-    <input matInput placeholder="Name" [formControl]="nameControl" />
-    <mat-error *ngIf="nameControl.invalid">Enter a valid Name</mat-error>
+    <input id="name-input" matInput placeholder="Name" [formControl]="nameControl" required />
+    <mat-error id="name-input-error">Enter a valid Name</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input matInput placeholder="Email" type="email" [formControl]="emailControl" />
-    <mat-error *ngIf="nameControl.invalid">Enter a valid Email</mat-error>
+    <input id='email-input' matInput placeholder="Email" type="email" [formControl]="emailControl" />
+    <mat-error id='email-input-error'>Enter a valid Email</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <mat-select placeholder="Country" [formControl]="countryControl">
+    <mat-select id="country-select" placeholder="Country" [formControl]="countryControl" required>
       <mat-option *ngFor="let country of countries" [value]="country.id">
         {{ country.name }}
       </mat-option>
     </mat-select>
-    <mat-error *ngIf="nameControl.invalid">Select a Country</mat-error>
+    <mat-error id="country-select-error">Select a Country</mat-error>
   </mat-form-field>
   <mat-form-field>
-    <input matInput placeholder="Market Value" [formControl]="marketValueControl" />
-    <mat-error *ngIf="nameControl.invalid">Enter a valid Market Value</mat-error>
+    <input id="market-value-input" matInput placeholder="Market Value" [formControl]="marketValueControl" required />
+    <mat-error id="market-value-input-error">Enter a valid Market Value</mat-error>
   </mat-form-field>
   <button mat-button type="submit">Add</button>
 </form>

@@ -1,25 +1,129 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientModule } from '@angular/common/http';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { async, TestBed } from '@angular/core/testing';
+import { NgxsModule } from '@ngxs/store';
+import { GetCountries, AddCompany, GetCompanies } from 'companies/state';
+import { CompaniesStateModel } from 'companies/state/companies.model';
+import { CompaniesState } from 'companies/state/companies.state';
+import { Country, NewCompany } from 'shared';
+import { ComponentData, StoreData } from 'shared/test';
 import { CompanyFormContainerComponent } from './company-form-container.component';
+import { debug } from 'util';
 
-describe('CompanyFormContainerComponent', () => {
-  let component: CompanyFormContainerComponent;
-  let fixture: ComponentFixture<CompanyFormContainerComponent>;
+/* What could have been done different?
+    - Mock store select:
+      * Because we didn't mock the store select, we integrate the component with the actual select.
+         Because of this, our test is coupled to the select implementation.
+         Specificaly to how the select sorts the countries, forcing us to specify a name.
+        => Mocking the whole Store.select mechanism to avoid this is overkill and unpractical.
+*/
+
+// We use a Test Child Component to isolate the SUT from the components it render while
+// testing its communications.
+@Component({
+  template: '',
+  selector: 'app-company-form'
+})
+class TestChildComponent {
+  @Input() countries: Country[];
+  @Input() isAddingCompany: boolean;
+  @Input() addCompanyError: string;
+
+  @Output() readonly addNewCompany = new EventEmitter<NewCompany>();
+}
+
+describe(CompanyFormContainerComponent.name, () => {
+  let storeTestData: StoreData<CompaniesStateModel>;
+  let testData: ComponentData<CompanyFormContainerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CompanyFormContainerComponent ]
-    })
-    .compileComponents();
+      imports: [HttpClientModule, NgxsModule.forRoot([CompaniesState])],
+      declarations: [CompanyFormContainerComponent, TestChildComponent]
+    }).compileComponents();
   }));
 
+  // This one must be called after the Test Module creation and before the component initialization.
   beforeEach(() => {
-    fixture = TestBed.createComponent(CompanyFormContainerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    storeTestData = new StoreData<CompaniesStateModel>(CompaniesState.stateName);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  beforeEach(() => {
+    testData = new ComponentData(CompanyFormContainerComponent);
+  });
+
+  it('creates', () => {
+    // Assert
+    testData.assertWasCreated();
+  });
+
+  it('dispatches GetCountries on init', () => {
+    // Assert
+    storeTestData.assertActionsDispatched(new GetCountries());
+  });
+
+  it('renders company form', () => {
+    // Assert
+    testData.assertHasChild(TestChildComponent);
+  });
+
+  it('selects countries', () => {
+    // Arrange
+    const testChild = testData.getChild(TestChildComponent);
+    const model = {
+      countries: [{ name: '' }, { name: '' }] as Country[]
+    } as CompaniesStateModel;
+
+    // Act
+    storeTestData.resetState(model);
+    testData.detectChanges();
+
+    // Assert
+    expect(testChild.countries).toEqual(model.countries);
+  });
+
+  it('selects is adding company flag', () => {
+    // Arrange
+    const testChild = testData.getChild(TestChildComponent);
+    const model = {
+      isAddingCompany: true
+    } as CompaniesStateModel;
+
+    // Act
+    storeTestData.resetState(model);
+    testData.detectChanges();
+
+    // Assert
+    expect(testChild.isAddingCompany).toBe(model.isAddingCompany);
+  });
+
+  it('selects add company error', () => {
+    // Arrange
+    const testChild = testData.getChild(TestChildComponent);
+    const model = {
+      addCompanyError: 'some error'
+    } as CompaniesStateModel;
+
+    // Act
+    storeTestData.resetState(model);
+    testData.detectChanges();
+
+    // Assert
+    expect(testChild.addCompanyError).toBe(model.addCompanyError);
+  });
+
+  it('dispatches AddCompany on addNewCompany event', () => {
+    // Arrange
+    const testChild = testData.getChild(TestChildComponent);
+    const newCompany = {} as NewCompany;
+    const expectedAction = new AddCompany(newCompany);
+
+    storeTestData.dispatchSpy.calls.reset();
+
+    // Act
+    testChild.addNewCompany.emit(newCompany);
+
+    // Assert
+    storeTestData.assertActionsDispatched(expectedAction);
   });
 });

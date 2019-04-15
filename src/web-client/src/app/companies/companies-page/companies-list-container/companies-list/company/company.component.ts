@@ -4,7 +4,7 @@ import { Company } from 'shared';
 @Component({
   selector: 'app-company',
   templateUrl: './company.component.html',
-  styleUrls: ['./company.component.less'],
+  styleUrls: ['./company.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompanyComponent {

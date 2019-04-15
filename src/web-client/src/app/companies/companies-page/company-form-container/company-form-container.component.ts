@@ -7,7 +7,7 @@ import { AddCompany, CompaniesSelectors, GetCountries } from '../../state';
 @Component({
   selector: 'app-company-form-container',
   templateUrl: './company-form-container.component.html',
-  styleUrls: ['./company-form-container.component.less']
+  styleUrls: ['./company-form-container.component.scss']
 })
 export class CompanyFormContainerComponent implements OnInit {
   @Select(CompaniesSelectors.countries) readonly countries$: Observable<Country[]>;
