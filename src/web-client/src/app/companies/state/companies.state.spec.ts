@@ -28,7 +28,7 @@ import { CompaniesState } from './companies.state';
         => Testing this should be considered a boundary integration test, and be performed directly over the Client classes to verify integration alone.
 */
 
-fdescribe(CompaniesState.name, () => {
+describe(CompaniesState.name, () => {
   let countriesSpy: jasmine.SpyObj<CountriesClient>;
   let companiesSpy: jasmine.SpyObj<CompaniesClient>;
   let stateData: StateData<CompaniesStateModel>;
