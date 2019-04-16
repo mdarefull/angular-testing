@@ -2,13 +2,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { async, TestBed } from '@angular/core/testing';
 import { NgxsModule } from '@ngxs/store';
-import { GetCountries, AddCompany, GetCompanies } from 'companies/state';
+import { AddCompany, GetCountries } from 'companies/state';
 import { CompaniesStateModel } from 'companies/state/companies.model';
 import { CompaniesState } from 'companies/state/companies.state';
 import { Country, NewCompany } from 'shared';
 import { ComponentData, StoreData } from 'shared/test';
 import { CompanyFormContainerComponent } from './company-form-container.component';
-import { debug } from 'util';
 
 /* What could have been done different?
     - Mock store select:

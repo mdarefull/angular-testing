@@ -1,10 +1,11 @@
 import { Store } from '@ngxs/store';
 import { TestBed } from '@angular/core/testing';
+import { Observable } from 'rxjs';
 
 export class StoreData<TModel> {
   stateName: string;
   store: Store;
-  dispatchSpy: jasmine.Spy;
+  dispatchSpy: jasmine.Spy<(event: any) => Observable<any>>;
 
   constructor(stateName: string) {
     this.stateName = stateName;

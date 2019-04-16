@@ -13,20 +13,9 @@ export class CompaniesState {
   static readonly stateName = 'companies';
 
   constructor(
-    private readonly companiesClient: CompaniesClient,
-    private readonly countriesClient: CountriesClient
+    private readonly countriesClient: CountriesClient,
+    private readonly companiesClient: CompaniesClient
   ) {}
-
-  @Action(GetCompanies)
-  getCompanies(ctx: StateContext<CompaniesStateModel>) {
-    return this.companiesClient.get().pipe(
-      tap(companies => {
-        ctx.patchState({
-          companies: companies
-        });
-      })
-    );
-  }
 
   @Action(GetCountries)
   getCountries(ctx: StateContext<CompaniesStateModel>) {
@@ -34,6 +23,17 @@ export class CompaniesState {
       tap(countries => {
         ctx.patchState({
           countries: countries
+        });
+      })
+    );
+  }
+
+  @Action(GetCompanies)
+  getCompanies(ctx: StateContext<CompaniesStateModel>) {
+    return this.companiesClient.get().pipe(
+      tap(companies => {
+        ctx.patchState({
+          companies: companies
         });
       })
     );
